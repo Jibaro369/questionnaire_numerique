@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Étude sur les pratiques et parcours dans l'environnement numérique</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f5f5f5; color: #1a1a1a; line-height: 1.6; padding: 20px; }
+        .container { max-width: 700px; margin: 0 auto; }
+        .header { background: linear-gradient(135deg, #4f46e5, #7c3aed); color: white; padding: 2rem; border-radius: 12px 12px 0 0; text-align: center; }
+        .header h1 { font-size: 1.5rem; font-weight: 600; margin-bottom: 0.5rem; }
+        .header p { font-size: 0.9rem; opacity: 0.9; }
+        .progress-container { background: white; padding: 1rem 2rem; border-bottom: 1px solid #e5e5e5; }
+        .progress-bar { background: #e5e5e5; height: 8px; border-radius: 4px; overflow: hidden; }
+        .progress-fill { background: #4f46e5; height: 100%; width: 0%; transition: width 0.3s ease; }
+        .progress-text { font-size: 0.85rem; color: #666; margin-top: 0.5rem; text-align: center; }
+        .form-container { background: white; padding: 2rem; border-radius: 0 0 12px 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+        .section { display: none; }
+        .section.active { display: block; }
+        .section-title { font-size: 1.2rem; font-weight: 600; color: #4f46e5; margin-bottom: 1.5rem; padding-bottom: 0.5rem; border-bottom: 2px solid #4f46e5; }
+        .question { margin-bottom: 1.5rem; padding: 1rem; background: #fafafa; border-radius: 8px; border-left: 3px solid #4f46e5; }
+        .question-label { font-weight: 500; margin-bottom: 0.75rem; display: block; }
+        .question-number { color: #4f46e5; font-weight: 600; }
+        .options { display: flex; flex-direction: column; gap: 0.5rem; }
+        .option { display: flex; align-items: center; gap: 0.5rem; padding: 0.5rem; border-radius: 6px; cursor: pointer; transition: background 0.2s; }
+        .option:hover { background: #f0f0f0; }
+        .option input[type="radio"], .option input[type="checkbox"] { accent-color: #4f46e5; width: 18px; height: 18px; }
+        .option label { cursor: pointer; flex: 1; }
+        .checkbox-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 0.5rem; }
+        input[type="number"], input[type="text"] { width: 100%; max-width: 200px; padding: 0.75rem; border: 1px solid #ddd; border-radius: 6px; font-size: 1rem; transition: border-color 0.2s; }
+        input[type="number"]:focus, input[type="text"]:focus { outline: none; border-color: #4f46e5; box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1); }
+        .input-group { display: flex; align-items: center; gap: 0.5rem; }
+        .input-suffix { color: #666; font-size: 0.9rem; }
+        .nav-buttons { display: flex; justify-content: space-between; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #e5e5e5; }
+        button { padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 1rem; font-weight: 500; cursor: pointer; transition: all 0.2s; }
+        .btn-prev { background: white; border: 1px solid #ddd; color: #666; }
+        .btn-prev:hover { background: #f5f5f5; }
+        .btn-next { background: #4f46e5; border: none; color: white; }
+        .btn-next:hover { background: #4338ca; }
+        .btn-submit { background: #10b981; border: none; color: white; }
+        .btn-submit:hover { background: #059669; }
+        button:disabled { opacity: 0.5; cursor: not-allowed; }
+        .section-nav { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-bottom: 1.5rem; }
+        .section-btn { padding: 0.5rem 1rem; background: #f0f0f0; border: none; border-radius: 20px; font-size: 0.85rem; cursor: pointer; transition: all 0.2s; }
+        .section-btn.active { background: #4f46e5; color: white; }
+        .section-btn:hover:not(.active) { background: #e0e0e0; }
+        .success-message { text-align: center; padding: 3rem; }
+        .success-message h2 { color: #10b981; margin-bottom: 1rem; }
+        .success-message p { color: #666; }
+        .checkmark { font-size: 4rem; margin-bottom: 1rem; }
+        @media (max-width: 600px) {
+            body { padding: 10px; }
+            .header, .form-container { padding: 1.5rem; }
+            .checkbox-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Étude sur les pratiques et parcours dans l'environnement numérique</h1>
+            <p>Ce questionnaire s'inscrit dans le cadre d'un travail académique universitaire.<br>Les réponses sont confidentielles et seront utilisées uniquement à des fins statistiques.</p>
+        </div>
+        
+        <div class="progress-container">
+            <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+            <div class="progress-text" id="progressText">Section 1 sur 7</div>
+        </div>
+        
+        <div class="form-container">
+            <div class="section-nav" id="sectionNav"></div>
+            
+            <form id="surveyForm">
+                <!-- Section 1: Accès matériel et technique -->
+                <div class="section active" id="section1">
+                    <h2 class="section-title">I. Accès matériel et technique</h2>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q1.</span> Équipements disponibles (plusieurs réponses possibles)</label>
+                        <div class="checkbox-grid">
+                            <div class="option"><input type="checkbox" id="q1_1" name="q1" value="smartphone"><label for="q1_1">Smartphone</label></div>
+                            <div class="option"><input type="checkbox" id="q1_2" name="q1" value="laptop"><label for="q1_2">Ordinateur portable</label></div>
+                            <div class="option"><input type="checkbox" id="q1_3" name="q1" value="desktop"><label for="q1_3">Ordinateur fixe</label></div>
+                            <div class="option"><input type="checkbox" id="q1_4" name="q1" value="tablet"><label for="q1_4">Tablette</label></div>
+                            <div class="option"><input type="checkbox" id="q1_5" name="q1" value="none"><label for="q1_5">Aucun équipement</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q2.</span> Quel est votre équipement principal ?</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q2_1" name="q2" value="1"><label for="q2_1">Smartphone</label></div>
+                            <div class="option"><input type="radio" id="q2_2" name="q2" value="2"><label for="q2_2">Ordinateur portable</label></div>
+                            <div class="option"><input type="radio" id="q2_3" name="q2" value="3"><label for="q2_3">Ordinateur fixe</label></div>
+                            <div class="option"><input type="radio" id="q2_4" name="q2" value="4"><label for="q2_4">Tablette</label></div>
+                            <div class="option"><input type="radio" id="q2_5" name="q2" value="5"><label for="q2_5">Aucun</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q3.</span> Cet équipement principal est :</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q3_1" name="q3" value="1"><label for="q3_1">Personnel</label></div>
+                            <div class="option"><input type="radio" id="q3_2" name="q3" value="2"><label for="q3_2">Partagé</label></div>
+                            <div class="option"><input type="radio" id="q3_3" name="q3" value="3"><label for="q3_3">Appartient à quelqu'un d'autre</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q4.</span> Si partagé, combien de personnes l'utilisent régulièrement ?</label>
+                        <div class="input-group">
+                            <input type="number" name="q4" min="0" max="20" placeholder="0">
+                            <span class="input-suffix">personnes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q5.</span> Depuis combien d'années avez-vous cet équipement principal ?</label>
+                        <div class="input-group">
+                            <input type="number" name="q5" min="0" max="30" placeholder="0">
+                            <span class="input-suffix">années</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q6.</span> Avez-vous un accès Internet à domicile ?</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q6_1" name="q6" value="1"><label for="q6_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q6_2" name="q6" value="2"><label for="q6_2">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q7.</span> Si oui, type de connexion principale :</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q7_1" name="q7" value="1"><label for="q7_1">Fibre</label></div>
+                            <div class="option"><input type="radio" id="q7_2" name="q7" value="2"><label for="q7_2">ADSL</label></div>
+                            <div class="option"><input type="radio" id="q7_3" name="q7" value="3"><label for="q7_3">4G/5G</label></div>
+                            <div class="option"><input type="radio" id="q7_4" name="q7" value="4"><label for="q7_4">Satellite</label></div>
+                            <div class="option"><input type="radio" id="q7_5" name="q7" value="5"><label for="q7_5">Autre</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q8.</span> Sur les 4 dernières semaines, combien de coupures Internet avez-vous eues ?</label>
+                        <input type="number" name="q8" min="0" max="100" placeholder="0">
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q9.</span> Coût mensuel Internet domicile</label>
+                        <div class="input-group">
+                            <input type="number" name="q9" min="0" max="500" placeholder="0">
+                            <span class="input-suffix">€</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q10.</span> Coût mensuel forfait mobile</label>
+                        <div class="input-group">
+                            <input type="number" name="q10" min="0" max="200" placeholder="0">
+                            <span class="input-suffix">€</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 2: Usages du numérique -->
+                <div class="section" id="section2">
+                    <h2 class="section-title">II. Usages du numérique</h2>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q11.</span> En moyenne, combien d'heures par semaine utilisez-vous Internet ?</label>
+                        <div class="input-group">
+                            <input type="number" name="q11" min="0" max="168" placeholder="0">
+                            <span class="input-suffix">heures</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q12.</span> Sur les 12 derniers mois, combien de démarches administratives en ligne avez-vous réalisées ?</label>
+                        <div class="input-group">
+                            <input type="number" name="q12" min="0" max="500" placeholder="0">
+                            <span class="input-suffix">démarches</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q13.</span> Sur les 4 dernières semaines, combien d'achats en ligne avez-vous réalisés ?</label>
+                        <input type="number" name="q13" min="0" max="100" placeholder="0">
+                    </div>
+                    
+                    <p style="font-weight: 500; margin: 1.5rem 0 1rem; color: #4f46e5;">Au cours des 4 dernières semaines, avez-vous utilisé Internet pour :</p>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q14.</span> Envoyer/recevoir des messages</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q14_1" name="q14" value="1"><label for="q14_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q14_2" name="q14" value="2"><label for="q14_2">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q15.</span> Regarder des vidéos / streaming / jeux</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q15_1" name="q15" value="1"><label for="q15_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q15_2" name="q15" value="2"><label for="q15_2">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q16.</span> Travail ou études</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q16_1" name="q16" value="1"><label for="q16_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q16_2" name="q16" value="2"><label for="q16_2">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q17.</span> Effectuer des achats en ligne</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q17_1" name="q17" value="1"><label for="q17_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q17_2" name="q17" value="2"><label for="q17_2">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q18.</span> Utiliser la banque en ligne</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q18_1" name="q18" value="1"><label for="q18_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q18_2" name="q18" value="2"><label for="q18_2">Non</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 3: Compétences numériques -->
+                <div class="section" id="section3">
+                    <h2 class="section-title">III. Compétences numériques</h2>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q19.</span> Avez-vous déjà réalisé seul(e) les actions suivantes ?</label>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Cochez toutes les actions que vous avez déjà réalisées</p>
+                        <div class="checkbox-grid">
+                            <div class="option"><input type="checkbox" id="q19_1" name="q19" value="email"><label for="q19_1">Envoyer un email avec pièce jointe</label></div>
+                            <div class="option"><input type="checkbox" id="q19_2" name="q19" value="compte"><label for="q19_2">Créer un compte en ligne</label></div>
+                            <div class="option"><input type="checkbox" id="q19_3" name="q19" value="formulaire"><label for="q19_3">Remplir un formulaire en ligne avec justificatif</label></div>
+                            <div class="option"><input type="checkbox" id="q19_4" name="q19" value="franceconnect"><label for="q19_4">Se connecter via FranceConnect</label></div>
+                            <div class="option"><input type="checkbox" id="q19_5" name="q19" value="2fa"><label for="q19_5">Utiliser une double authentification</label></div>
+                            <div class="option"><input type="checkbox" id="q19_6" name="q19" value="app"><label for="q19_6">Installer ou mettre à jour une application</label></div>
+                            <div class="option"><input type="checkbox" id="q19_7" name="q19" value="scan"><label for="q19_7">Scanner ou photographier un document et l'envoyer</label></div>
+                            <div class="option"><input type="checkbox" id="q19_8" name="q19" value="word"><label for="q19_8">Utiliser un logiciel de traitement de texte</label></div>
+                            <div class="option"><input type="checkbox" id="q19_9" name="q19" value="excel"><label for="q19_9">Utiliser un tableur</label></div>
+                            <div class="option"><input type="checkbox" id="q19_10" name="q19" value="ppt"><label for="q19_10">Utiliser un logiciel de présentation</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 4: Difficultés rencontrées -->
+                <div class="section" id="section4">
+                    <h2 class="section-title">IV. Difficultés rencontrées</h2>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q20.</span> Sur les 12 derniers mois, vous est-il arrivé de :</label>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Cochez toutes les situations rencontrées</p>
+                        <div class="checkbox-grid">
+                            <div class="option"><input type="checkbox" id="q20_1" name="q20" value="echec"><label for="q20_1">Ne pas réussir à terminer une démarche en ligne</label></div>
+                            <div class="option"><input type="checkbox" id="q20_2" name="q20" value="mdp"><label for="q20_2">Oublier un identifiant ou mot de passe</label></div>
+                            <div class="option"><input type="checkbox" id="q20_3" name="q20" value="doc"><label for="q20_3">Ne pas réussir à joindre un document</label></div>
+                            <div class="option"><input type="checkbox" id="q20_4" name="q20" value="abandon"><label for="q20_4">Abandonner une démarche</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q21.</span> Nombre de démarches en ligne commencées sur les 12 derniers mois</label>
+                        <input type="number" name="q21" min="0" max="500" placeholder="0">
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q22.</span> Nombre de démarches en ligne terminées sur les 12 derniers mois</label>
+                        <input type="number" name="q22" min="0" max="500" placeholder="0">
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q23.</span> Temps approximatif pour la dernière démarche en ligne réalisée ou tentée</label>
+                        <div class="input-group">
+                            <input type="number" name="q23" min="0" max="500" placeholder="0">
+                            <span class="input-suffix">minutes</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q24.</span> Nombre de tentatives avant réussite (ou abandon)</label>
+                        <div class="input-group">
+                            <input type="number" name="q24" min="0" max="50" placeholder="0">
+                            <span class="input-suffix">tentatives</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 5: Aide et accompagnement -->
+                <div class="section" id="section5">
+                    <h2 class="section-title">V. Aide et accompagnement</h2>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q25.</span> Sur les 3 derniers mois, combien de fois avez-vous été aidé(e) pour une démarche en ligne ?</label>
+                        <input type="number" name="q25" min="0" max="100" placeholder="0">
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q26.</span> Aide la plus fréquente</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q26_1" name="q26" value="1"><label for="q26_1">Proche (famille, ami)</label></div>
+                            <div class="option"><input type="radio" id="q26_2" name="q26" value="2"><label for="q26_2">Association / médiateur numérique</label></div>
+                            <div class="option"><input type="radio" id="q26_3" name="q26" value="3"><label for="q26_3">Agent service public</label></div>
+                            <div class="option"><input type="radio" id="q26_4" name="q26" value="4"><label for="q26_4">Prestataire payant</label></div>
+                            <div class="option"><input type="radio" id="q26_5" name="q26" value="5"><label for="q26_5">Autre</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q27.</span> Part estimée des démarches en ligne réalisées avec aide</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q27_1" name="q27" value="1"><label for="q27_1">0 %</label></div>
+                            <div class="option"><input type="radio" id="q27_2" name="q27" value="2"><label for="q27_2">1–25 %</label></div>
+                            <div class="option"><input type="radio" id="q27_3" name="q27" value="3"><label for="q27_3">26–50 %</label></div>
+                            <div class="option"><input type="radio" id="q27_4" name="q27" value="4"><label for="q27_4">51–75 %</label></div>
+                            <div class="option"><input type="radio" id="q27_5" name="q27" value="5"><label for="q27_5">76–100 %</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q28.</span> Sur les 3 derniers mois, avez-vous payé pour être aidé(e) ?</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q28_1" name="q28" value="1"><label for="q28_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q28_2" name="q28" value="2"><label for="q28_2">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q29.</span> Si oui, montant total approximatif</label>
+                        <div class="input-group">
+                            <input type="number" name="q29" min="0" max="5000" placeholder="0">
+                            <span class="input-suffix">€</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 6: Exposition à la dématérialisation -->
+                <div class="section" id="section6">
+                    <h2 class="section-title">VI. Exposition à la dématérialisation</h2>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q30.</span> Sur les 12 derniers mois, avez-vous eu :</label>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Cochez toutes les situations vécues</p>
+                        <div class="checkbox-grid">
+                            <div class="option"><input type="checkbox" id="q30_1" name="q30" value="demenagement"><label for="q30_1">Déménagement</label></div>
+                            <div class="option"><input type="checkbox" id="q30_2" name="q30" value="emploi"><label for="q30_2">Perte ou changement d'emploi</label></div>
+                            <div class="option"><input type="checkbox" id="q30_3" name="q30" value="famille"><label for="q30_3">Changement familial (naissance/séparation, etc.)</label></div>
+                            <div class="option"><input type="checkbox" id="q30_4" name="q30" value="sante"><label for="q30_4">Problème de santé important</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q31.</span> Sur les 12 derniers mois, avez-vous eu des démarches en ligne avec :</label>
+                        <p style="font-size: 0.9rem; color: #666; margin-bottom: 1rem;">Cochez tous les organismes concernés</p>
+                        <div class="checkbox-grid">
+                            <div class="option"><input type="checkbox" id="q31_1" name="q31" value="impots"><label for="q31_1">Impôts</label></div>
+                            <div class="option"><input type="checkbox" id="q31_2" name="q31" value="cpam"><label for="q31_2">Assurance maladie</label></div>
+                            <div class="option"><input type="checkbox" id="q31_3" name="q31" value="caf"><label for="q31_3">CAF</label></div>
+                            <div class="option"><input type="checkbox" id="q31_4" name="q31" value="ft"><label for="q31_4">France Travail</label></div>
+                            <div class="option"><input type="checkbox" id="q31_5" name="q31" value="pref"><label for="q31_5">Préfecture</label></div>
+                            <div class="option"><input type="checkbox" id="q31_6" name="q31" value="mairie"><label for="q31_6">Mairie / services locaux</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q32.</span> Sur les 12 derniers mois, avez-vous eu un retard de prestation/versement lié à un dossier/démarche en ligne ?</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q32_1" name="q32" value="1"><label for="q32_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q32_2" name="q32" value="2"><label for="q32_2">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q33.</span> Si oui, retard maximal</label>
+                        <div class="input-group">
+                            <input type="number" name="q33" min="0" max="365" placeholder="0">
+                            <span class="input-suffix">jours</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q34.</span> Un dossier a-t-il été refusé ou mis en attente pour pièce manquante ?</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q34_1" name="q34" value="1"><label for="q34_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q34_2" name="q34" value="2"><label for="q34_2">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q35.</span> Si oui, combien de fois ?</label>
+                        <div class="input-group">
+                            <input type="number" name="q35" min="0" max="50" placeholder="0">
+                            <span class="input-suffix">fois</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q36.</span> Sur les 12 derniers mois, avez-vous renoncé à un soin car la prise de rendez-vous était surtout en ligne ?</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q36_1" name="q36" value="1"><label for="q36_1">Oui</label></div>
+                            <div class="option"><input type="radio" id="q36_2" name="q36" value="2"><label for="q36_2">Non</label></div>
+                            <div class="option"><input type="radio" id="q36_3" name="q36" value="8"><label for="q36_3">Non concerné</label></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Section 7: Situation socio-économique -->
+                <div class="section" id="section7">
+                    <h2 class="section-title">VII. Situation socio-économique et identification</h2>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q37.</span> Diplôme le plus élevé</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q37_1" name="q37" value="1"><label for="q37_1">Aucun</label></div>
+                            <div class="option"><input type="radio" id="q37_2" name="q37" value="2"><label for="q37_2">Brevet</label></div>
+                            <div class="option"><input type="radio" id="q37_3" name="q37" value="3"><label for="q37_3">CAP/BEP</label></div>
+                            <div class="option"><input type="radio" id="q37_4" name="q37" value="4"><label for="q37_4">Bac</label></div>
+                            <div class="option"><input type="radio" id="q37_5" name="q37" value="5"><label for="q37_5">Bac+2</label></div>
+                            <div class="option"><input type="radio" id="q37_6" name="q37" value="6"><label for="q37_6">Licence</label></div>
+                            <div class="option"><input type="radio" id="q37_7" name="q37" value="7"><label for="q37_7">Master ou plus</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q38.</span> Situation professionnelle actuelle</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q38_1" name="q38" value="1"><label for="q38_1">CDI</label></div>
+                            <div class="option"><input type="radio" id="q38_2" name="q38" value="2"><label for="q38_2">CDD / Intérim</label></div>
+                            <div class="option"><input type="radio" id="q38_3" name="q38" value="3"><label for="q38_3">Indépendant</label></div>
+                            <div class="option"><input type="radio" id="q38_4" name="q38" value="4"><label for="q38_4">Au chômage</label></div>
+                            <div class="option"><input type="radio" id="q38_5" name="q38" value="5"><label for="q38_5">Étudiant</label></div>
+                            <div class="option"><input type="radio" id="q38_6" name="q38" value="6"><label for="q38_6">Retraité</label></div>
+                            <div class="option"><input type="radio" id="q38_7" name="q38" value="7"><label for="q38_7">Inactif</label></div>
+                            <div class="option"><input type="radio" id="q38_8" name="q38" value="8"><label for="q38_8">Autre</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q39.</span> Si au chômage, durée actuelle</label>
+                        <div class="input-group">
+                            <input type="number" name="q39" min="0" max="240" placeholder="0">
+                            <span class="input-suffix">mois</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q40.</span> Lieu de résidence</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q40_1" name="q40" value="1"><label for="q40_1">Urbain</label></div>
+                            <div class="option"><input type="radio" id="q40_2" name="q40" value="2"><label for="q40_2">Périurbain</label></div>
+                            <div class="option"><input type="radio" id="q40_3" name="q40" value="3"><label for="q40_3">Rural</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q41.</span> Vous sentez-vous à l'aise pour lire et comprendre les documents administratifs en français ?</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q41_1" name="q41" value="1"><label for="q41_1">Oui, tout à fait</label></div>
+                            <div class="option"><input type="radio" id="q41_2" name="q41" value="2"><label for="q41_2">Plutôt oui</label></div>
+                            <div class="option"><input type="radio" id="q41_3" name="q41" value="3"><label for="q41_3">Plutôt non</label></div>
+                            <div class="option"><input type="radio" id="q41_4" name="q41" value="4"><label for="q41_4">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q42.</span> Vous sentez-vous à l'aise pour lire et comprendre des contenus en anglais sur Internet ?</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q42_1" name="q42" value="1"><label for="q42_1">Oui, tout à fait</label></div>
+                            <div class="option"><input type="radio" id="q42_2" name="q42" value="2"><label for="q42_2">Plutôt oui</label></div>
+                            <div class="option"><input type="radio" id="q42_3" name="q42" value="3"><label for="q42_3">Plutôt non</label></div>
+                            <div class="option"><input type="radio" id="q42_4" name="q42" value="4"><label for="q42_4">Non</label></div>
+                        </div>
+                    </div>
+                    
+                    <p style="font-weight: 500; margin: 1.5rem 0 1rem; color: #4f46e5;">Identification</p>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q43.</span> Âge</label>
+                        <div class="input-group">
+                            <input type="number" name="q43" min="16" max="120" placeholder="0">
+                            <span class="input-suffix">ans</span>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q44.</span> Sexe</label>
+                        <div class="options">
+                            <div class="option"><input type="radio" id="q44_1" name="q44" value="1"><label for="q44_1">Femme</label></div>
+                            <div class="option"><input type="radio" id="q44_2" name="q44" value="2"><label for="q44_2">Homme</label></div>
+                            <div class="option"><input type="radio" id="q44_3" name="q44" value="3"><label for="q44_3">Autre</label></div>
+                            <div class="option"><input type="radio" id="q44_4" name="q44" value="4"><label for="q44_4">Préfère ne pas répondre</label></div>
+                        </div>
+                    </div>
+                    
+                    <div class="question">
+                        <label class="question-label"><span class="question-number">Q45.</span> Nom et prénom (optionnel)</label>
+                        <input type="text" name="q45" placeholder="Votre nom et prénom" style="max-width: 100%;">
+                    </div>
+                </div>
+
+                <!-- Success message -->
+                <div class="section" id="sectionSuccess">
+                    <div class="success-message">
+                        <div class="checkmark">✓</div>
+                        <h2>Merci pour votre participation !</h2>
+                        <p>Vos réponses ont été enregistrées avec succès.<br>Elles contribueront à notre étude sur les pratiques numériques.</p>
+                        <button type="button" onclick="resetForm()" style="margin-top: 1.5rem;" class="btn-next">Recommencer</button>
+                    </div>
+                </div>
+                
+                <div class="nav-buttons" id="navButtons">
+                    <button type="button" class="btn-prev" id="prevBtn" onclick="changeSection(-1)">← Précédent</button>
+                    <button type="button" class="btn-next" id="nextBtn" onclick="changeSection(1)">Suivant →</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const totalSections = 7;
+        let currentSection = 1;
+        const sectionNames = ['Accès', 'Usages', 'Compétences', 'Difficultés', 'Aide', 'Dématérialisation', 'Profil'];
+
+        // Remplace ici par ton URL Google Apps Script
+        const SCRIPT_URL = "COLLE_ICI_TON_URL_GOOGLE_APPS_SCRIPT";
+        
+        function initSectionNav() {
+            const nav = document.getElementById('sectionNav');
+            nav.innerHTML = '';
+            sectionNames.forEach((name, i) => {
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = 'section-btn' + (i === 0 ? ' active' : '');
+                btn.textContent = name;
+                btn.onclick = () => goToSection(i + 1);
+                nav.appendChild(btn);
+            });
+        }
+        
+        function updateUI() {
+            document.querySelectorAll('.section').forEach((s, i) => {
+                s.classList.toggle('active', i + 1 === currentSection);
+            });
+            document.querySelectorAll('.section-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i + 1 === currentSection);
+            });
+            document.getElementById('progressFill').style.width = (Math.min(currentSection, totalSections) / totalSections * 100) + '%';
+            document.getElementById('progressText').textContent = currentSection <= totalSections ? `Section ${currentSection} sur ${totalSections}` : 'Terminé !';
+            document.getElementById('prevBtn').disabled = currentSection === 1;
+            document.getElementById('nextBtn').textContent = currentSection === totalSections ? 'Envoyer ✓' : 'Suivant →';
+            document.getElementById('nextBtn').className = currentSection === totalSections ? 'btn-submit' : 'btn-next';
+            document.getElementById('navButtons').style.display = currentSection > totalSections ? 'none' : 'flex';
+        }
+        
+        function changeSection(delta) {
+            if (currentSection === totalSections && delta === 1) {
+                submitForm();
+                return;
+            }
+            currentSection = Math.max(1, Math.min(totalSections, currentSection + delta));
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        function goToSection(num) {
+            currentSection = num;
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        async function submitForm() {
+            const form = document.getElementById('surveyForm');
+            const formData = new FormData(form);
+            const data = {};
+
+            for (let [key, value] of formData.entries()) {
+                if (data[key]) {
+                    if (Array.isArray(data[key])) {
+                        data[key].push(value);
+                    } else {
+                        data[key] = [data[key], value];
+                    }
+                } else {
+                    data[key] = value;
+                }
+            }
+
+            data.dateSoumission = new Date().toLocaleString('fr-FR');
+
+            const nextBtn = document.getElementById('nextBtn');
+            const oldText = nextBtn.textContent;
+            nextBtn.disabled = true;
+            nextBtn.textContent = 'Envoi en cours...';
+
+            try {
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'text/plain;charset=utf-8'
+                    },
+                    body: JSON.stringify(data)
+                });
+
+                const result = await response.json();
+
+                if (result.success) {
+                    currentSection = totalSections + 1;
+                    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                    document.getElementById('sectionSuccess').classList.add('active');
+                    document.getElementById('navButtons').style.display = 'none';
+                    document.getElementById('progressFill').style.width = '100%';
+                    document.getElementById('progressText').textContent = 'Terminé !';
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                } else {
+                    alert("Erreur lors de l'enregistrement : " + (result.error || "Erreur inconnue"));
+                }
+            } catch (error) {
+                console.error(error);
+                alert("Impossible d'envoyer les réponses. Vérifie l'URL du script, le déploiement, et que la page est hébergée en ligne.");
+            } finally {
+                nextBtn.disabled = false;
+                nextBtn.textContent = oldText;
+            }
+        }
+        
+        function resetForm() {
+            document.getElementById('surveyForm').reset();
+            currentSection = 1;
+            document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+            document.getElementById('section1').classList.add('active');
+            document.getElementById('navButtons').style.display = 'flex';
+            updateUI();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+        
+        initSectionNav();
+        updateUI();
+    </script>
+</body>
+</html>
